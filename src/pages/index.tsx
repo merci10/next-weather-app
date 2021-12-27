@@ -83,10 +83,9 @@ const Home: NextPage = () => {
           </Link>
         </Flex>
         <InputGroup>
-          <InputLeftElement
-            pointerEvents="none"
-            children={<MdSearch color="gray.300" />}
-          />
+          <InputLeftElement pointerEvents="none">
+            <MdSearch color="gray.300" />
+          </InputLeftElement>
           <Input
             pr="4.5rem"
             type="text"
