@@ -5,18 +5,19 @@ import {
   Flex,
   Button,
   Spacer,
-  Circle,
   Input,
   InputGroup,
   InputLeftElement,
   List,
   ListItem,
   ListIcon,
-  InputRightAddon,
+  IconButton,
 } from "@chakra-ui/react";
 import { MdMyLocation, MdSearch, MdChevronRight } from "react-icons/md";
 import { useGeolocation } from "react-use";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 const useFetch = <T,>(url: string, enabled: boolean = true) => {
   const [state, setState] = useState<T>();
@@ -38,6 +39,7 @@ const useFetch = <T,>(url: string, enabled: boolean = true) => {
 const Home: NextPage = () => {
   const { latitude, longitude } = useGeolocation();
   const [inputLocation, setInputLocation] = useState("");
+  const router = useRouter();
 
   const searchURLByLattLong = `https://www.metaweather.com/api/location/search/?lattlong=${latitude},${longitude}`;
   const nearbyLocations = useFetch<WeatherAPILocation[]>(
@@ -45,8 +47,12 @@ const Home: NextPage = () => {
     latitude !== null && longitude !== null
   ); // 近くのロケーションの情報がいつくか入ってる
 
-  const searchURLByWoeid = `https://www.metaweather.com/api/location/${nearbyLocations?.[0].woeid}/`;
-  const nearbyWeather = useFetch<WeatherAPILocationWeather>(
+  const woeid =
+    typeof router.query.woeid === "string" && router.query.woeid !== ""
+      ? router.query.woeid
+      : nearbyLocations?.[0].woeid;
+  const searchURLByWoeid = `https://www.metaweather.com/api/location/${woeid}/`;
+  const weatherInfo = useFetch<WeatherAPILocationWeather>(
     `/api/cors-anywhere?url=${encodeURI(searchURLByWoeid)}`,
     nearbyLocations?.[0].woeid !== undefined
   );
@@ -65,9 +71,16 @@ const Home: NextPage = () => {
             Search for places
           </Button>
           <Spacer />
-          <Circle size="40px" bg="gray.400" color="white" as="button">
-            <MdMyLocation size={30} />
-          </Circle>
+          <Link href="/" passHref>
+            <IconButton
+              as="a"
+              aria-label="search current location weather"
+              icon={<MdMyLocation />}
+              borderRadius="full"
+              fontSize="2xl"
+              color="gray.500"
+            />
+          </Link>
         </Flex>
         <InputGroup>
           <InputLeftElement
@@ -87,14 +100,16 @@ const Home: NextPage = () => {
         <List spacing={10} display={inputLocation ? "block" : "none"}>
           {searchedLocations?.map((location) => (
             <ListItem key={location.woeid}>
-              {location.title}
+              <Link href={`?woeid=${location.woeid}`}>
+                <a>{location.title}</a>
+              </Link>
               <ListIcon as={MdChevronRight} float="right" />
             </ListItem>
           ))}
         </List>
       </GridItem>
       <GridItem bg="papayawhip">
-        <pre>{JSON.stringify(nearbyWeather, null, 2)}</pre>
+        <pre>{JSON.stringify(weatherInfo, null, 2)}</pre>
       </GridItem>
     </Grid>
   );
