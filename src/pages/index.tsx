@@ -38,7 +38,7 @@ import {
   MdNavigation,
 } from "react-icons/md";
 import { useGeolocation } from "react-use";
-import {useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -71,8 +71,8 @@ const Home: NextPage = () => {
   const { isOpen, onOpen: _onOpen, onClose } = useDisclosure();
   const onOpen = useCallback(() => {
     _onOpen();
-    setInputLocation("")
-  },[_onOpen])
+    setInputLocation("");
+  }, [_onOpen]);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const searchURLByLattLong = `https://www.metaweather.com/api/location/search/?lattlong=${latitude},${longitude}`;
@@ -109,7 +109,7 @@ const Home: NextPage = () => {
       >
         <DrawerOverlay />
         <DrawerContent maxW="30%">
-          <DrawerCloseButton />
+          <DrawerCloseButton top={4} right={4} />
           <DrawerHeader>Search for places</DrawerHeader>
           <DrawerBody>
             <InputGroup>
@@ -126,13 +126,24 @@ const Home: NextPage = () => {
                 }}
               />
             </InputGroup>
-            <List spacing={10} display={inputLocation ? "block" : "none"}>
+            <List spacing={2} mt={2} display={inputLocation ? "block" : "none"}>
               {searchedLocations?.map((location) => (
-                <ListItem key={location.woeid}>
+                <ListItem
+                  key={location.woeid}
+                  py={4}
+                  pl={4}
+                  fontSize="xl"
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  borderRadius={6}
+                  border="2px solid transparent"
+                  _hover={{ border: "2px solid #90CDF4" }}
+                >
                   <Link href={`?woeid=${location.woeid}`}>
                     <a onClick={onClose}>{location.title}</a>
                   </Link>
-                  <ListIcon as={MdChevronRight} float="right" />
+                  <ListIcon as={MdChevronRight} />
                 </ListItem>
               ))}
             </List>
@@ -141,18 +152,15 @@ const Home: NextPage = () => {
       </Drawer>
       <Grid h="100vh" minH="300px" templateColumns="30% 1fr" gap={1}>
         <GridItem rowSpan={1} colSpan={1}>
-          <Flex p={[9, 9, 0, 9]}>
+          <Flex px={8} py={4} justifyContent="space-between">
             <Button
-              bg="gray.400"
-              color="gray.50"
-              borderRadius={0}
+              colorScheme="telegram"
               type="button"
               onClick={onOpen}
               ref={buttonRef}
             >
               Search for places
             </Button>
-            <Spacer />
             <Link href="/" passHref>
               <IconButton
                 as="a"
@@ -378,3 +386,7 @@ type WeatherAPILocationWeather = {
   latt_long: string;
   timezone: string;
 };
+
+// todo
+//  today weatherの表示
+//  CとFの切り替え
