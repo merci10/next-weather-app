@@ -68,11 +68,11 @@ const Home: NextPage = () => {
   const { latitude, longitude } = useGeolocation();
   const [inputLocation, setInputLocation] = useState("");
   const router = useRouter();
-  const { isOpen, onOpen: _onOpen, onClose } = useDisclosure();
-  const onOpen = useCallback(() => {
-    _onOpen();
-    setInputLocation("");
-  }, [_onOpen]);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  // const onOpen = useCallback(() => {
+  //   _onOpen();
+  //   setInputLocation("");
+  // }, [_onOpen]);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const searchURLByLattLong = `https://www.metaweather.com/api/location/search/?lattlong=${latitude},${longitude}`;
