@@ -36,6 +36,7 @@ import {
   MdSearch,
   MdChevronRight,
   MdNavigation,
+  MdLocationOn
 } from "react-icons/md";
 import { useGeolocation } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -150,61 +151,98 @@ const Home: NextPage = () => {
           </DrawerBody>
         </DrawerContent>
       </Drawer>
-      <Grid h="100vh" minH="300px" templateColumns="30% 1fr" gap={1}>
-        <GridItem rowSpan={1} colSpan={1}>
-          <Flex px={8} py={4} justifyContent="space-between">
-            <Button
-              colorScheme="telegram"
-              type="button"
-              onClick={onOpen}
-              ref={buttonRef}
-            >
-              Search for places
-            </Button>
-            <Link href="/" passHref>
-              <IconButton
-                as="a"
-                aria-label="search current location weather"
-                icon={<MdMyLocation />}
-                borderRadius="full"
-                fontSize="2xl"
-                color="gray.500"
+      {todaysWeather && (
+        <Grid h="100vh" minH="300px" templateColumns="30% 1fr" gap={1}>
+          <GridItem rowSpan={1} colSpan={1}>
+            <Flex px={8} py={4} justifyContent="space-between">
+              <Button
+                colorScheme="telegram"
+                type="button"
+                onClick={onOpen}
+                ref={buttonRef}
+              >
+                Search for places
+              </Button>
+              <Link href="/" passHref>
+                <IconButton
+                  as="a"
+                  aria-label="search current location weather"
+                  icon={<MdMyLocation />}
+                  borderRadius="full"
+                  fontSize="2xl"
+                  color="gray.500"
+                />
+              </Link>
+            </Flex>
+            <VStack>
+              <Image
+                boxSize="150px"
+                objectFit="cover"
+                src={`https://www.metaweather.com/static/img/weather/${todaysWeather.weather_state_abbr}.svg`}
+                alt={`${todaysWeather.weather_state_abbr} weather icon`}
+                mt={20}
               />
-            </Link>
-          </Flex>
-        </GridItem>
-        <GridItem bg="gray">
-          <Flex gap={4} flexWrap="wrap">
-            {weatherInfo?.consolidated_weather
-              .slice(1)
-              .map((weather, index) => (
-                <VStack
-                  p={5}
-                  shadow="md"
-                  borderWidth="1px"
-                  flex="1"
-                  borderRadius="md"
-                  key={weather.id}
-                >
-                  <Heading as="h4" fontSize="xl">
-                    {index === 0
-                      ? "Tomorrow"
-                      : convertDate(new Date(weather.applicable_date))}
-                  </Heading>
-                  <Image
-                    boxSize="70px"
-                    objectFit="cover"
-                    src={`https://www.metaweather.com/static/img/weather/${weather.weather_state_abbr}.svg`}
-                    alt="Dan Abramov"
-                  />
-                  <HStack>
-                    <Text>{Math.round(weather.max_temp)}°C</Text>
-                    <Text>{Math.round(weather.min_temp)}°C</Text>
-                  </HStack>
-                </VStack>
-              ))}
-          </Flex>
-          {todaysWeather && (
+              <HStack pt={10}>
+                <HStack alignItems="baseline">
+                  <Text as="div" fontSize="8xl" fontWeight="bold">
+                    {Math.round(todaysWeather.max_temp)}
+                  </Text>
+                  <Text as="div" fontSize="4xl">
+                    °C
+                  </Text>
+                </HStack>
+                <HStack alignItems="baseline">
+                  <Text as="div" fontSize="8xl" fontWeight="bold" ml={5}>
+                    {Math.round(todaysWeather.min_temp)}
+                  </Text>
+                  <Text as="div" fontSize="4xl">
+                    °C
+                  </Text>
+                </HStack>
+              </HStack>
+              <Text as="span" fontSize="5xl">
+                {todaysWeather.weather_state_name}
+              </Text>
+              <Text as="span" fontSize="sm">
+                today・{convertDate(new Date(todaysWeather.applicable_date))}
+              </Text>
+              <HStack>
+                <Icon as={MdLocationOn} />
+                <Text as="i">{weatherInfo.title}</Text>
+              </HStack>
+            </VStack>
+          </GridItem>
+          <GridItem bg="gray">
+            <Flex gap={4} flexWrap="wrap">
+              {weatherInfo?.consolidated_weather
+                .slice(1)
+                .map((weather, index) => (
+                  <VStack
+                    p={5}
+                    shadow="md"
+                    borderWidth="1px"
+                    flex="1"
+                    borderRadius="md"
+                    key={weather.id}
+                  >
+                    <Heading as="h4" fontSize="xl">
+                      {index === 0
+                        ? "Tomorrow"
+                        : convertDate(new Date(weather.applicable_date))}
+                    </Heading>
+                    <Image
+                      boxSize="70px"
+                      objectFit="cover"
+                      src={`https://www.metaweather.com/static/img/weather/${weather.weather_state_abbr}.svg`}
+                      alt={`${weather.weather_state_abbr} weather icon`}
+                    />
+                    <HStack>
+                      <Text>{Math.round(weather.max_temp)}°C</Text>
+                      <Text>{Math.round(weather.min_temp)}°C</Text>
+                    </HStack>
+                  </VStack>
+                ))}
+            </Flex>
             <Stack>
               <Heading as="h2">Today&apos;s Hightlights</Heading>
               <Flex gap={10} flexWrap="wrap">
@@ -238,7 +276,7 @@ const Home: NextPage = () => {
                       <Icon
                         as={MdNavigation}
                         position="relative"
-                        top={"-1px"}
+                        top="-1px"
                       />
                     </Center>
                     <Text as="span" fontSize="xl">
@@ -322,10 +360,10 @@ const Home: NextPage = () => {
                 </VStack>
               </Flex>
             </Stack>
-          )}
-          <pre>{JSON.stringify(weatherInfo, null, 2)}</pre>
-        </GridItem>
-      </Grid>
+            <pre>{JSON.stringify(weatherInfo, null, 2)}</pre>
+          </GridItem>
+        </Grid>
+      )}
     </>
   );
 };
