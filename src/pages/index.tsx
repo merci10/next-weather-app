@@ -2,6 +2,7 @@ import type { NextPage } from "next";
 import {
   Grid,
   GridItem,
+  SimpleGrid,
   Flex,
   Button,
   Spacer,
@@ -31,6 +32,7 @@ import {
   DrawerCloseButton,
   useDisclosure,
   Circle,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import {
   MdMyLocation,
@@ -124,16 +126,21 @@ const Home: NextPage = () => {
 
   const todaysWeather = weatherInfo?.consolidated_weather[0];
 
+  const drawerPlacement = useBreakpointValue({
+    base: "top",
+    md: "left",
+  } as const);
+
   return (
     <>
       <Drawer
         isOpen={isOpen}
-        placement="left"
+        placement={drawerPlacement}
         onClose={onClose}
         finalFocusRef={buttonRef}
       >
         <DrawerOverlay />
-        <DrawerContent maxW="30%">
+        <DrawerContent maxW="400px" minH="100vh">
           <DrawerCloseButton top={4} right={4} />
           <DrawerHeader>Search for places</DrawerHeader>
           <DrawerBody>
@@ -151,24 +158,30 @@ const Home: NextPage = () => {
                 }}
               />
             </InputGroup>
-            <List spacing={2} mt={2} display={inputLocation ? "block" : "none"}>
+            <List mt={2} display={inputLocation ? "block" : "none"}>
               {searchedLocations?.map((location) => (
                 <ListItem
                   key={location.woeid}
-                  py={4}
-                  pl={4}
+                  height={16}
                   fontSize="xl"
-                  display="flex"
-                  justifyContent="space-between"
-                  alignItems="center"
                   borderRadius={6}
                   border="2px solid transparent"
                   _hover={{ border: "2px solid #90CDF4" }}
                 >
-                  <Link href={`?woeid=${location.woeid}`}>
-                    <a onClick={onClose}>{location.title}</a>
+                  <Link href={`?woeid=${location.woeid}`} passHref>
+                    <Flex
+                      pl={4}
+                      as="a"
+                      onClick={onClose}
+                      height="full"
+                      w="full"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Box as="span">{location.title}</Box>
+                      <ListIcon as={MdChevronRight} />
+                    </Flex>
                   </Link>
-                  <ListIcon as={MdChevronRight} />
                 </ListItem>
               ))}
             </List>
@@ -176,7 +189,11 @@ const Home: NextPage = () => {
         </DrawerContent>
       </Drawer>
       {todaysWeather && (
-        <Grid h="100vh" minH="300px" templateColumns="30% 1fr" gap={1}>
+        <Grid
+          h="100vh"
+          minH="300px"
+          templateColumns={{ base: "1fr", md: "400px 1fr" }}
+        >
           <GridItem rowSpan={1} colSpan={1}>
             <Flex px={8} py={4} justifyContent="space-between">
               <Button
@@ -199,7 +216,7 @@ const Home: NextPage = () => {
                 />
               </Link>
             </Flex>
-            <VStack>
+            <Flex flexDirection="column" alignItems="center">
               <Image
                 boxSize="150px"
                 objectFit="cover"
@@ -207,7 +224,7 @@ const Home: NextPage = () => {
                 alt={`${todaysWeather.weather_state_abbr} weather icon`}
                 mt={20}
               />
-              <HStack pt={10}>
+              <HStack mt={10}>
                 <HStack alignItems="baseline">
                   <Text as="div" fontSize="8xl" fontWeight="bold">
                     {Math.round(getTemp(todaysWeather.max_temp))}
@@ -225,19 +242,19 @@ const Home: NextPage = () => {
                   </Text>
                 </HStack>
               </HStack>
-              <Text as="span" fontSize="5xl">
+              <Text as="span" fontSize="5xl" mt={8}>
                 {todaysWeather.weather_state_name}
               </Text>
-              <Text as="span" fontSize="sm">
+              <Text as="span" fontSize="sm" mt={8}>
                 today・{convertDate(new Date(todaysWeather.applicable_date))}
               </Text>
-              <HStack>
+              <HStack mt={8}>
                 <Icon as={MdLocationOn} />
                 <Text as="i">{weatherInfo.title}</Text>
               </HStack>
-            </VStack>
+            </Flex>
           </GridItem>
-          <GridItem bg="gray">
+          <GridItem bg="gray" py={4} px={10}>
             <Flex justifyContent="flex-end" mr={3}>
               <Circle
                 as="button"
@@ -263,7 +280,11 @@ const Home: NextPage = () => {
                 °F
               </Circle>
             </Flex>
-            <Flex gap={4} flexWrap="wrap">
+            <SimpleGrid
+              columns={{ base: 2, sm: 2, lg: 3, xl: 5 }}
+              gap={4}
+              mt={4}
+            >
               {weatherInfo?.consolidated_weather
                 .slice(1)
                 .map((weather, index) => (
@@ -271,11 +292,10 @@ const Home: NextPage = () => {
                     p={5}
                     shadow="md"
                     borderWidth="1px"
-                    flex="1"
                     borderRadius="md"
                     key={weather.id}
                   >
-                    <Heading as="h4" fontSize="xl">
+                    <Heading as="h4" fontSize={{base: "sm", sm: "xl"}}>
                       {index === 0
                         ? "Tomorrow"
                         : convertDate(new Date(weather.applicable_date))}
@@ -298,120 +318,100 @@ const Home: NextPage = () => {
                     </HStack>
                   </VStack>
                 ))}
-            </Flex>
-            <Stack>
-              <Heading as="h2">Today&apos;s Hightlights</Heading>
-              <Flex gap={10} flexWrap="wrap">
-                <VStack
-                  p={5}
-                  shadow="md"
-                  borderWidth="1px"
-                  flex="1"
-                  borderRadius="md"
-                  minW="360px"
-                >
-                  <Heading as="h3" fontSize="2xl">
-                    Wind status
-                  </Heading>
-                  <HStack spacing={0} alignItems="baseline">
-                    <Text as="span" fontSize="8xl" fontWeight="bold">
-                      {Math.round(todaysWeather.wind_speed)}
-                    </Text>
-                    <Text as="span" fontSize="4xl">
-                      mph
-                    </Text>
-                  </HStack>
-                  <HStack>
-                    <Center
-                      backgroundColor="white"
-                      borderRadius="full"
-                      width={6}
-                      height={6}
-                      transform={`rotate(${todaysWeather.wind_direction}deg)`}
-                    >
-                      <Icon as={MdNavigation} position="relative" top="-1px" />
-                    </Center>
-                    <Text as="span" fontSize="xl">
-                      {todaysWeather.wind_direction_compass}
-                    </Text>
-                  </HStack>
-                </VStack>
-                <VStack
-                  p={5}
-                  shadow="md"
-                  borderWidth="1px"
-                  flex="1"
-                  borderRadius="md"
-                  minW="360px"
-                >
-                  <Heading as="h3" fontSize="2xl">
-                    Humidity
-                  </Heading>
-                  <HStack spacing={0} alignItems="baseline">
-                    <Text as="span" fontSize="8xl" fontWeight="bold">
-                      {Math.round(todaysWeather.humidity)}
-                    </Text>
-                    <Text as="span" fontSize="4xl">
-                      %
-                    </Text>
-                  </HStack>
-                  <Box w="full" px={6}>
-                    <Flex justifyContent="space-between" alignItems="baseline">
-                      <Text as="span">0</Text>
-                      <Text as="span">50</Text>
-                      <Text as="span">100</Text>
-                    </Flex>
-                    <Progress
-                      value={todaysWeather.humidity}
-                      borderRadius="full"
-                    />
-                    <Flex justifyContent="flex-end">
-                      <Text as="span">%</Text>
-                    </Flex>
-                  </Box>
-                </VStack>
-                <VStack
-                  p={5}
-                  shadow="md"
-                  borderWidth="1px"
-                  flex="1"
-                  borderRadius="md"
-                  minW="360px"
-                >
-                  <Heading as="h3" fontSize="2xl">
-                    Visibility
-                  </Heading>
-                  <HStack spacing={0} alignItems="baseline">
-                    <Text as="span" fontSize="8xl" fontWeight="bold">
-                      {Math.round(todaysWeather.visibility * 10) / 10}
-                    </Text>
-                    <Text as="span" fontSize="4xl">
-                      miles
-                    </Text>
-                  </HStack>
-                </VStack>
-                <VStack
-                  p={5}
-                  shadow="md"
-                  borderWidth="1px"
-                  flex="1"
-                  borderRadius="md"
-                  minW="360px"
-                >
-                  <Heading as="h3" fontSize="2xl">
-                    Air Pressure
-                  </Heading>
-                  <HStack spacing={0} alignItems="baseline">
-                    <Text as="span" fontSize="8xl" fontWeight="bold">
-                      {Math.round(todaysWeather.air_pressure)}
-                    </Text>
-                    <Text as="span" fontSize="4xl">
-                      mb
-                    </Text>
-                  </HStack>
-                </VStack>
-              </Flex>
-            </Stack>
+            </SimpleGrid>
+            <Heading as="h2" mt={8}>
+              Today&apos;s Hightlights
+            </Heading>
+            <SimpleGrid
+              columns={{ base: 1, sm: 1, md: 1, lg: 2 }}
+              gap={{ base: 4, md: 8 }}
+              mt={4}
+            >
+              <VStack p={5} shadow="md" borderWidth="1px" borderRadius="md">
+                <Heading as="h3" fontSize={{ base: "xl", md: "2xl" }}>
+                  Wind status
+                </Heading>
+                <HStack spacing={0} alignItems="baseline">
+                  <Text
+                    as="span"
+                    fontSize={{ base: "4xl", md: "8xl" }}
+                    fontWeight="bold"
+                  >
+                    {Math.round(todaysWeather.wind_speed)}
+                  </Text>
+                  <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
+                    mph
+                  </Text>
+                </HStack>
+                <HStack>
+                  <Center
+                    backgroundColor="white"
+                    borderRadius="full"
+                    width={6}
+                    height={6}
+                    transform={`rotate(${todaysWeather.wind_direction}deg)`}
+                  >
+                    <Icon as={MdNavigation} position="relative" top="-1px" />
+                  </Center>
+                  <Text as="span" fontSize="xl">
+                    {todaysWeather.wind_direction_compass}
+                  </Text>
+                </HStack>
+              </VStack>
+              <VStack p={5} shadow="md" borderWidth="1px" borderRadius="md">
+                <Heading as="h3" fontSize={{ base: "xl", md: "2xl" }}>
+                  Humidity
+                </Heading>
+                <HStack spacing={0} alignItems="baseline">
+                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                    {Math.round(todaysWeather.humidity)}
+                  </Text>
+                  <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
+                    %
+                  </Text>
+                </HStack>
+                <Box w="full" px={6}>
+                  <Flex justifyContent="space-between" alignItems="baseline">
+                    <Text as="span">0</Text>
+                    <Text as="span">50</Text>
+                    <Text as="span">100</Text>
+                  </Flex>
+                  <Progress
+                    value={todaysWeather.humidity}
+                    borderRadius="full"
+                  />
+                  <Flex justifyContent="flex-end">
+                    <Text as="span">%</Text>
+                  </Flex>
+                </Box>
+              </VStack>
+              <VStack p={5} shadow="md" borderWidth="1px" borderRadius="md">
+                <Heading as="h3" fontSize={{ base: "xl", md: "2xl" }}>
+                  Visibility
+                </Heading>
+                <HStack spacing={0} alignItems="baseline">
+                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                    {Math.round(todaysWeather.visibility * 10) / 10}
+                  </Text>
+                  <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
+                    miles
+                  </Text>
+                </HStack>
+              </VStack>
+              <VStack p={5} shadow="md" borderWidth="1px" borderRadius="md">
+                <Heading as="h3" fontSize={{ base: "xl", md: "2xl" }}>
+                  Air Pressure
+                </Heading>
+                <HStack spacing={0} alignItems="baseline">
+                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                    {Math.round(todaysWeather.air_pressure)}
+                  </Text>
+                  <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
+                    mb
+                  </Text>
+                </HStack>
+              </VStack>
+            </SimpleGrid>
           </GridItem>
         </Grid>
       )}
