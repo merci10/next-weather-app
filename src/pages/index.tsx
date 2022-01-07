@@ -66,6 +66,28 @@ const convertDate = (date: Date) => {
   return format(date, "EEE, d MMM");
 };
 
+const convertTempToF = (temp: number): number => {
+  return (9 * temp + 32 * 5) / 5; // °C to °F
+};
+
+const useTempState = () => {
+  const [tempUnit, setTempUnit] = useState<"°C" | "°F">("°C");
+
+  const getTemp = (baseTemp: number) => {
+    if (tempUnit === "°C") {
+      return baseTemp;
+    } else {
+      return convertTempToF(baseTemp);
+    }
+  };
+
+  return {
+    tempUnit,
+    setTempUnit,
+    getTemp,
+  };
+};
+
 const Home: NextPage = () => {
   const { latitude, longitude } = useGeolocation();
   const [inputLocation, setInputLocation] = useState("");
@@ -76,7 +98,7 @@ const Home: NextPage = () => {
   //   setInputLocation("");
   // }, [_onOpen]);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const [tempUnit, setTempUnit] = useState<"°C" | "°F">("°C");
+  const { tempUnit, setTempUnit, getTemp } = useTempState();
 
   const searchURLByLattLong = `https://www.metaweather.com/api/location/search/?lattlong=${latitude},${longitude}`;
   const nearbyLocations = useFetch<WeatherAPILocation[]>(
@@ -101,10 +123,6 @@ const Home: NextPage = () => {
   );
 
   const todaysWeather = weatherInfo?.consolidated_weather[0];
-
-  const convertTempToF = (temp: number): number => {
-    return (9 * temp + 32 * 5) / 5; //
-  };
 
   return (
     <>
@@ -192,9 +210,7 @@ const Home: NextPage = () => {
               <HStack pt={10}>
                 <HStack alignItems="baseline">
                   <Text as="div" fontSize="8xl" fontWeight="bold">
-                    {tempUnit === "°C"
-                      ? Math.round(todaysWeather.max_temp)
-                      : Math.round(convertTempToF(todaysWeather.max_temp))}
+                    {Math.round(getTemp(todaysWeather.max_temp))}
                   </Text>
                   <Text as="div" fontSize="4xl">
                     {tempUnit}
@@ -202,9 +218,7 @@ const Home: NextPage = () => {
                 </HStack>
                 <HStack alignItems="baseline">
                   <Text as="div" fontSize="8xl" fontWeight="bold" ml={5}>
-                    {tempUnit === "°C"
-                      ? Math.round(todaysWeather.min_temp)
-                      : Math.round(convertTempToF(todaysWeather.min_temp))}
+                    {Math.round(getTemp(todaysWeather.min_temp))}
                   </Text>
                   <Text as="div" fontSize="4xl">
                     {tempUnit}
@@ -274,15 +288,11 @@ const Home: NextPage = () => {
                     />
                     <HStack>
                       <Text>
-                        {tempUnit === "°C"
-                          ? Math.round(weather.max_temp)
-                          : Math.round(convertTempToF(weather.max_temp))}
+                        {Math.round(getTemp(weather.max_temp))}
                         {tempUnit}
                       </Text>
                       <Text>
-                        {tempUnit === "°C"
-                          ? Math.round(weather.min_temp)
-                          : Math.round(convertTempToF(weather.min_temp))}
+                        {Math.round(getTemp(weather.min_temp))}
                         {tempUnit}
                       </Text>
                     </HStack>
@@ -402,7 +412,6 @@ const Home: NextPage = () => {
                 </VStack>
               </Flex>
             </Stack>
-            <pre>{JSON.stringify(weatherInfo, null, 2)}</pre>
           </GridItem>
         </Grid>
       )}
