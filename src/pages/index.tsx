@@ -5,7 +5,6 @@ import {
   SimpleGrid,
   Flex,
   Button,
-  Spacer,
   Input,
   InputGroup,
   InputLeftElement,
@@ -19,19 +18,16 @@ import {
   Text,
   Image,
   VStack,
-  Stack,
   Icon,
   Center,
   Progress,
   Drawer,
   DrawerBody,
-  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   DrawerContent,
   DrawerCloseButton,
   useDisclosure,
-  Circle,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import {
@@ -42,7 +38,7 @@ import {
   MdLocationOn,
 } from "react-icons/md";
 import { useGeolocation } from "react-use";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -95,10 +91,6 @@ const Home: NextPage = () => {
   const [inputLocation, setInputLocation] = useState("");
   const router = useRouter();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  // const onOpen = useCallback(() => {
-  //   _onOpen();
-  //   setInputLocation("");
-  // }, [_onOpen]);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { tempUnit, setTempUnit, getTemp } = useTempState();
 
@@ -255,30 +247,26 @@ const Home: NextPage = () => {
             </Flex>
           </GridItem>
           <GridItem bg="gray" py={4} px={10}>
-            <Flex justifyContent="flex-end" mr={3}>
-              <Circle
-                as="button"
-                size="40px"
-                background={tempUnit === "°C" ? "tomato" : "gray.300"}
+            <Flex justifyContent="flex-end">
+              <IconButton
+                aria-label="to °C"
+                icon={<>°C</>}
+                borderRadius="full"
+                fontSize="md"
                 color="white"
-                fontWeight="bold"
-                _hover={{ opacity: "0.8" }}
+                backgroundColor={tempUnit === "°C" ? "tomato" : "gray.300"}
                 onClick={() => setTempUnit("°C")}
                 mr={3}
-              >
-                °C
-              </Circle>
-              <Circle
-                as="button"
-                size="40px"
-                background={tempUnit === "°C" ? "gray.300" : "tomato"}
+              />
+              <IconButton
+                aria-label="to °F"
+                icon={<>°F</>}
+                borderRadius="full"
+                fontSize="md"
                 color="white"
-                fontWeight="bold"
-                _hover={{ opacity: "0.8" }}
+                backgroundColor={tempUnit === "°C" ? "gray.300" : "tomato"}
                 onClick={() => setTempUnit("°F")}
-              >
-                °F
-              </Circle>
+              />
             </Flex>
             <SimpleGrid
               columns={{ base: 2, sm: 2, lg: 3, xl: 5 }}
@@ -295,7 +283,7 @@ const Home: NextPage = () => {
                     borderRadius="md"
                     key={weather.id}
                   >
-                    <Heading as="h4" fontSize={{base: "sm", sm: "xl"}}>
+                    <Heading as="h4" fontSize={{ base: "sm", sm: "xl" }}>
                       {index === 0
                         ? "Tomorrow"
                         : convertDate(new Date(weather.applicable_date))}
@@ -363,7 +351,11 @@ const Home: NextPage = () => {
                   Humidity
                 </Heading>
                 <HStack spacing={0} alignItems="baseline">
-                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                  <Text
+                    as="span"
+                    fontSize={{ base: "4xl", md: "8xl" }}
+                    fontWeight="bold"
+                  >
                     {Math.round(todaysWeather.humidity)}
                   </Text>
                   <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
@@ -390,7 +382,11 @@ const Home: NextPage = () => {
                   Visibility
                 </Heading>
                 <HStack spacing={0} alignItems="baseline">
-                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                  <Text
+                    as="span"
+                    fontSize={{ base: "4xl", md: "8xl" }}
+                    fontWeight="bold"
+                  >
                     {Math.round(todaysWeather.visibility * 10) / 10}
                   </Text>
                   <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
@@ -403,7 +399,11 @@ const Home: NextPage = () => {
                   Air Pressure
                 </Heading>
                 <HStack spacing={0} alignItems="baseline">
-                  <Text as="span" fontSize={{ base: "4xl", md: "8xl" }} fontWeight="bold">
+                  <Text
+                    as="span"
+                    fontSize={{ base: "4xl", md: "8xl" }}
+                    fontWeight="bold"
+                  >
                     {Math.round(todaysWeather.air_pressure)}
                   </Text>
                   <Text as="span" fontSize={{ base: "2xl", md: "4xl" }}>
@@ -475,7 +475,3 @@ type WeatherAPILocationWeather = {
   latt_long: string;
   timezone: string;
 };
-
-// todo
-//  today weatherの表示
-//  CとFの切り替え
