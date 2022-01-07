@@ -30,13 +30,14 @@ import {
   DrawerContent,
   DrawerCloseButton,
   useDisclosure,
+  Circle,
 } from "@chakra-ui/react";
 import {
   MdMyLocation,
   MdSearch,
   MdChevronRight,
   MdNavigation,
-  MdLocationOn
+  MdLocationOn,
 } from "react-icons/md";
 import { useGeolocation } from "react-use";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -75,6 +76,7 @@ const Home: NextPage = () => {
   //   setInputLocation("");
   // }, [_onOpen]);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const [tempUnit, setTempUnit] = useState<"°C" | "°F">("°C");
 
   const searchURLByLattLong = `https://www.metaweather.com/api/location/search/?lattlong=${latitude},${longitude}`;
   const nearbyLocations = useFetch<WeatherAPILocation[]>(
@@ -99,6 +101,10 @@ const Home: NextPage = () => {
   );
 
   const todaysWeather = weatherInfo?.consolidated_weather[0];
+
+  const convertTempToF = (temp: number): number => {
+    return (9 * temp + 32 * 5) / 5; //
+  };
 
   return (
     <>
@@ -170,7 +176,8 @@ const Home: NextPage = () => {
                   icon={<MdMyLocation />}
                   borderRadius="full"
                   fontSize="2xl"
-                  color="gray.500"
+                  color="white"
+                  backgroundColor="tomato"
                 />
               </Link>
             </Flex>
@@ -185,18 +192,22 @@ const Home: NextPage = () => {
               <HStack pt={10}>
                 <HStack alignItems="baseline">
                   <Text as="div" fontSize="8xl" fontWeight="bold">
-                    {Math.round(todaysWeather.max_temp)}
+                    {tempUnit === "°C"
+                      ? Math.round(todaysWeather.max_temp)
+                      : Math.round(convertTempToF(todaysWeather.max_temp))}
                   </Text>
                   <Text as="div" fontSize="4xl">
-                    °C
+                    {tempUnit}
                   </Text>
                 </HStack>
                 <HStack alignItems="baseline">
                   <Text as="div" fontSize="8xl" fontWeight="bold" ml={5}>
-                    {Math.round(todaysWeather.min_temp)}
+                    {tempUnit === "°C"
+                      ? Math.round(todaysWeather.min_temp)
+                      : Math.round(convertTempToF(todaysWeather.min_temp))}
                   </Text>
                   <Text as="div" fontSize="4xl">
-                    °C
+                    {tempUnit}
                   </Text>
                 </HStack>
               </HStack>
@@ -213,6 +224,31 @@ const Home: NextPage = () => {
             </VStack>
           </GridItem>
           <GridItem bg="gray">
+            <Flex justifyContent="flex-end" mr={3}>
+              <Circle
+                as="button"
+                size="40px"
+                background={tempUnit === "°C" ? "tomato" : "gray.300"}
+                color="white"
+                fontWeight="bold"
+                _hover={{ opacity: "0.8" }}
+                onClick={() => setTempUnit("°C")}
+                mr={3}
+              >
+                °C
+              </Circle>
+              <Circle
+                as="button"
+                size="40px"
+                background={tempUnit === "°C" ? "gray.300" : "tomato"}
+                color="white"
+                fontWeight="bold"
+                _hover={{ opacity: "0.8" }}
+                onClick={() => setTempUnit("°F")}
+              >
+                °F
+              </Circle>
+            </Flex>
             <Flex gap={4} flexWrap="wrap">
               {weatherInfo?.consolidated_weather
                 .slice(1)
@@ -237,8 +273,18 @@ const Home: NextPage = () => {
                       alt={`${weather.weather_state_abbr} weather icon`}
                     />
                     <HStack>
-                      <Text>{Math.round(weather.max_temp)}°C</Text>
-                      <Text>{Math.round(weather.min_temp)}°C</Text>
+                      <Text>
+                        {tempUnit === "°C"
+                          ? Math.round(weather.max_temp)
+                          : Math.round(convertTempToF(weather.max_temp))}
+                        {tempUnit}
+                      </Text>
+                      <Text>
+                        {tempUnit === "°C"
+                          ? Math.round(weather.min_temp)
+                          : Math.round(convertTempToF(weather.min_temp))}
+                        {tempUnit}
+                      </Text>
                     </HStack>
                   </VStack>
                 ))}
@@ -273,11 +319,7 @@ const Home: NextPage = () => {
                       height={6}
                       transform={`rotate(${todaysWeather.wind_direction}deg)`}
                     >
-                      <Icon
-                        as={MdNavigation}
-                        position="relative"
-                        top="-1px"
-                      />
+                      <Icon as={MdNavigation} position="relative" top="-1px" />
                     </Center>
                     <Text as="span" fontSize="xl">
                       {todaysWeather.wind_direction_compass}
